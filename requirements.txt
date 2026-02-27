@@ -1,0 +1,31 @@
+# API & Server
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+
+# RAG & Embeddings
+langchain>=0.1.0
+langchain-community>=0.0.20
+langchain-text-splitters>=0.2.0
+langchain-core>=0.1.0
+qdrant-client>=1.7.0
+openai>=1.0.0
+sentence-transformers>=2.2.0
+
+# Voice
+faster-whisper>=1.0.0
+TTS>=0.22.0
+
+# Config & Validation
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# HTTP & Multipart
+python-multipart>=0.0.6
+httpx>=0.26.0
+
+# Observability (future)
+prometheus-client>=0.19.0
+
+# Document loaders
+pypdf>=3.17.0
+unstructured>=0.12.0
