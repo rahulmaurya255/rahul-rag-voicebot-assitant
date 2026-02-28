@@ -33,7 +33,7 @@ def transcribe(audio_path: str | Path) -> str:
     """Transcribe audio file to text. Blocking."""
     model = _get_model()
     segments, _ = model.transcribe(str(audio_path), language="en")
-    return " ".join(s.segment for s in segments).strip()
+    return " ".join(s.text for s in segments).strip()
 
 
 def transcribe_bytes(audio_bytes: bytes) -> str:

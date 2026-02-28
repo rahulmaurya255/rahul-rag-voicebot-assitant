@@ -103,12 +103,12 @@ class VectorService:
     ) -> list[dict[str, Any]]:
         """Search for similar vectors."""
         client = self._get_client()
-        results = client.search(
+        results = client.query_points(
             collection_name=self._collection,
-            query_vector=query_vector,
+            query=query_vector,
             limit=top_k,
             score_threshold=score_threshold,
-        )
+        ).points
         return [
             {
                 "id": str(r.id),

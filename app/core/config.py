@@ -29,14 +29,12 @@ class Settings(BaseSettings):
     qdrant_collection: str = Field(default="rahul_knowledge", description="Vector collection name")
     qdrant_api_key: Optional[str] = Field(default=None, description="Qdrant API key (required for cloud)")
 
-    # Embeddings (OpenAI)
-    openai_api_key: Optional[str] = Field(default=None, description="OpenAI API key for embeddings")
-    embedding_provider: str = Field(default="openai", description="openai or bge")
+    # Embeddings (BGE default - no API key required)
     embedding_model: str = Field(
-        default="text-embedding-3-small",
-        description="OpenAI embedding model",
+        default="BAAI/bge-small-en-v1.5",
+        description="Sentence transformer model for embeddings",
     )
-    embedding_dim: int = Field(default=1536, description="Embedding vector dimension (OpenAI)")
+    embedding_dim: int = Field(default=384, description="Embedding vector dimension (BGE)")
 
     # Ollama
     ollama_base_url: str = Field(default="http://localhost:11434", description="Ollama API base URL")
@@ -48,7 +46,7 @@ class Settings(BaseSettings):
 
     # RAG
     rag_top_k: int = Field(default=5, description="Number of chunks to retrieve")
-    rag_score_threshold: float = Field(default=0.7, description="Minimum similarity score for retrieval")
+    rag_score_threshold: float = Field(default=0.3, description="Minimum similarity score for retrieval")
 
     # STT (Faster-Whisper)
     stt_model_size: str = Field(default="small", description="Whisper model size: tiny, base, small, medium, large")

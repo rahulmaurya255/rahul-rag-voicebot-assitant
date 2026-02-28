@@ -47,8 +47,6 @@ class RAGChain:
             return FALLBACK_ANSWER
 
         context = self._build_context(chunks)
-        if not context:
-            return "This information is not available in Rahul's knowledge base."
 
         try:
             if stream:
@@ -62,8 +60,6 @@ class RAGChain:
         """Run RAG and return (answer, source_refs)."""
         chunks = await self._retriever.retrieve(query)
         context = self._build_context(chunks)
-        if not context:
-            return "This information is not available in Rahul's knowledge base.", []
 
         sources = [
             c.get("metadata", {}).get("source", "unknown")
