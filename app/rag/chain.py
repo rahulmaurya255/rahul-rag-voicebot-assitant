@@ -50,7 +50,7 @@ class RAGChain:
 
         try:
             if stream:
-                return self._llm.generate(context=context, query=query, stream=True)
+                return await self._llm.generate(context=context, query=query, stream=True)
             return await self._llm.generate(context=context, query=query, stream=False)
         except Exception as e:
             logger.error("LLM generation failed: %s", e)

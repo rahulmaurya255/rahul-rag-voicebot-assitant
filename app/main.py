@@ -22,8 +22,8 @@ async def lifespan(app: FastAPI):
         from app.voice.stt import warmup as stt_warmup
         from app.voice.tts import warmup as tts_warmup
         from app.services.llm_service import get_llm_service
-        stt_warmup()
-        tts_warmup()
+        await stt_warmup()
+        await tts_warmup()
         await get_llm_service().warmup()
     except Exception as e:
         logger.warning("Startup warm-up skipped or failed: %s", e)

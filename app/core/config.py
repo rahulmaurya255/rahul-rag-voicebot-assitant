@@ -14,6 +14,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="ignore",
     )
 
     # API
@@ -36,13 +37,10 @@ class Settings(BaseSettings):
     )
     embedding_dim: int = Field(default=384, description="Embedding vector dimension (BGE)")
 
-    # Ollama
-    ollama_base_url: str = Field(default="http://localhost:11434", description="Ollama API base URL")
-    ollama_model: str = Field(
-        default="mistral:7b-instruct",
-        description="Ollama model name (e.g., mistral:7b-instruct, llama3.1:8b)",
-    )
-    ollama_timeout: float = Field(default=60.0, description="Ollama request timeout in seconds")
+    # Groq LLM
+    groq_api_key: Optional[str] = Field(default=None, description="Groq API key")
+    groq_model: str = Field(default="llama-3.1-8b-instant", description="Groq model ID")
+    groq_max_tokens: int = Field(default=512, description="Max tokens for Groq response")
 
     # RAG
     rag_top_k: int = Field(default=5, description="Number of chunks to retrieve")
@@ -53,12 +51,8 @@ class Settings(BaseSettings):
     stt_device: str = Field(default="cpu", description="Device for STT: cpu or cuda")
     stt_compute_type: str = Field(default="int8", description="Compute type for CPU: int8 or float32")
 
-    # TTS (Coqui)
-    tts_model: str = Field(
-        default="tts_models/en/ljspeech/tacotron2-DDC",
-        description="Coqui TTS model name",
-    )
-    tts_device: str = Field(default="cpu", description="Device for TTS: cpu or cuda")
+    # TTS (edge-tts, free Microsoft Neural voices)
+    tts_voice: str = Field(default="en-IN-PrabhatNeural", description="edge-tts voice name")
 
     # Security & Limits
     max_upload_size_mb: int = Field(default=10, description="Max audio upload size in MB")

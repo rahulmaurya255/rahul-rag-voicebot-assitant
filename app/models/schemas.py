@@ -31,7 +31,7 @@ class HealthResponse(BaseModel):
     status: str = Field(..., description="Overall status: healthy or degraded")
     api: bool = Field(..., description="API is up")
     qdrant: bool = Field(..., description="Qdrant is reachable")
-    ollama: bool = Field(..., description="Ollama is reachable")
+    llm: bool = Field(..., description="LLM (Groq) is reachable")
 
 
 class ErrorResponse(BaseModel):
