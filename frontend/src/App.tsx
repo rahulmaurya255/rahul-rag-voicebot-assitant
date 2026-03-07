@@ -126,6 +126,8 @@ export default function App() {
   const [userText, setUserText] = useState("");
   const [volume, setVolume] = useState(0);
   const [error, setError] = useState("");
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
 
   const streamRef = useRef<MediaStream | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -142,6 +144,7 @@ export default function App() {
 
   const stateRef = useRef(state);
   stateRef.current = state;
+  pausedRef.current = paused;
   const silenceCountRef = useRef(0);
   const speechCountRef = useRef(0);
   const vadActiveRef = useRef(false);
@@ -412,6 +415,7 @@ export default function App() {
   useEffect(() => {
     initMic();
     const interval = setInterval(() => {
+      if (pausedRef.current) return;
       const v = volumeRef.current;
       const s = stateRef.current;
       
@@ -577,7 +581,7 @@ export default function App() {
   };
 
   const stateLabels: Record<AppState, string> = {
-    idle: "Tap or start speaking",
+    idle: paused ? "Paused" : "Tap or start speaking",
     listening: "Listening...",
     processing: "Thinking...",
     speaking: "Speaking...",
@@ -615,7 +619,13 @@ export default function App() {
       </div>
 
       <footer className="footer-hint">
-        <p>Always listening &middot; Speak naturally &middot; Tap orb to interrupt</p>
+        <button className={"pause-btn" + (paused ? " paused" : "")} onClick={() => {
+          if (!paused) { interruptAll(); }
+          setPaused(!paused);
+        }}>
+          {paused ? "Resume" : "Pause"}
+        </button>
+        <p>{paused ? "Paused — Mike is not listening" : "Always listening · Speak naturally · Tap orb to interrupt"}</p>
       </footer>
     </div>
   );
