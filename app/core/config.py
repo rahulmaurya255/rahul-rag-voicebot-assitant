@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     # Groq LLM
     groq_api_key: Optional[str] = Field(default=None, description="Groq API key")
     groq_model: str = Field(default="llama-3.1-8b-instant", description="Groq model ID")
-    groq_max_tokens: int = Field(default=150, description="Max tokens for Groq response")
+    groq_max_tokens: int = Field(default=200, description="Max tokens for Groq response")
 
     # RAG
     rag_top_k: int = Field(default=3, description="Number of chunks to retrieve")
