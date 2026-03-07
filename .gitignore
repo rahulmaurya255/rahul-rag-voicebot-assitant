@@ -8,3 +8,7 @@ __pycache__
 htmlcov
 .idea
 .vscode
+node_modules
+frontend/node_modules
+app/static/assets
+_tmp_path.txt

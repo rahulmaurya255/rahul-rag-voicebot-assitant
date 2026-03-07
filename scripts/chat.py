@@ -58,11 +58,11 @@ def main():
 
     api_ok = h.get("api", False)
     qdrant_ok = h.get("qdrant", False)
-    ollama_ok = h.get("ollama", False)
-    status = "healthy" if all([api_ok, qdrant_ok, ollama_ok]) else "degraded"
+    llm_ok = h.get("llm", False)
+    status = "healthy" if all([api_ok, qdrant_ok, llm_ok]) else "degraded"
     status_icon = "✅" if status == "healthy" else "⚠️"
     print(f"\n  {status_icon} Server status: {status}")
-    print(f"     API: {'✅' if api_ok else '❌'}  Qdrant: {'✅' if qdrant_ok else '❌'}  Ollama: {'✅' if ollama_ok else '❌'}")
+    print(f"     API: {'✅' if api_ok else '❌'}  Qdrant: {'✅' if qdrant_ok else '❌'}  LLM: {'✅' if llm_ok else '❌'}")
     print()
 
     while True:
