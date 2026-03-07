@@ -13,11 +13,15 @@ His academic training in mathematics helped him develop strong analytical thinki
 
 ---
 
-# 3. Professional Experience
+# 3. Professional Experience Overview
 
-Rahul Maurya has professional experience across machine-learning, data science, and financial crime technology systems. His work spans machine learning development, AI system architecture, and financial services analytics.
+Rahul Maurya's professional experience spans three companies. The companies Rahul has worked at are: (1) HSBC (current role) as Manager in Financial Crime Digital Transformation, working on fraud detection, AML, and transaction monitoring, (2) Namma Yatri (previous role) as Data Analyst I and full-stack data scientist, building churn prediction models and an AI voicebot, and (3) Dados Technologies / Bullsmart (earliest role) as Sales Analyst in fintech. His professional experience covers banking, mobility tech, and fintech industries.
 
-His professional experience includes building production-grade machine learning systems, developing AI-powered support systems, and working on financial crime transformation initiatives in large financial institutions.
+---
+
+# 3.0 Projects Overview
+
+Rahul has built multiple technical projects: (1) Customer Churn Prediction Model at Namma Yatri - an end-to-end ML system using gradient boosting to predict user churn from behavioral data like ride history and engagement patterns, (2) AI-powered RAG Voicebot for Customer Support at Namma Yatri - using LiveKit, Qdrant, Pinecone, Google Gemini, and FastAPI, (3) RAG Voicebot Assistant (personal project) - a voice-based AI assistant using FastAPI, Qdrant, Groq LLM, and edge-tts, available at github.com/rahulmaurya255/rahul-rag-voicebot-assitant, and (4) Flask To-Do Application - a basic backend project. When asked about Rahul's projects, list all of them.
 
 ---
 

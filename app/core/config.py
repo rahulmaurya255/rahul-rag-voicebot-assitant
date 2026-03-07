@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     groq_max_tokens: int = Field(default=200, description="Max tokens for Groq response")
 
     # RAG
-    rag_top_k: int = Field(default=3, description="Number of chunks to retrieve")
+    rag_top_k: int = Field(default=5, description="Number of chunks to retrieve")
     rag_score_threshold: float = Field(default=0.3, description="Minimum similarity score for retrieval")
 
     # STT (Faster-Whisper)

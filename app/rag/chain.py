@@ -31,6 +31,28 @@ class RAGChain:
                 parts.append(f"[{i}] {content}")
         return "\n\n".join(parts)
 
+    @staticmethod
+    def _enrich_query(query: str, history: list | None) -> str:
+        """Enrich query with conversation context for better retrieval.
+
+        When user says 'tell me more about that' or 'details of the model',
+        the raw query misses context. By appending the last exchange's topic,
+        the embedding captures both current intent and previous subject.
+        """
+        if not history or len(history) < 2:
+            return query
+        # Get the last assistant message (contains the topic being discussed)
+        last_assistant = ""
+        for msg in reversed(history):
+            if msg.get("role") == "assistant":
+                last_assistant = msg.get("content", "")
+                break
+        if not last_assistant:
+            return query
+        # Take first 120 chars of last response as topic hint
+        topic_hint = last_assistant[:120]
+        return f"{query} (context: {topic_hint})"
+
     async def query(
         self,
         query: str,
@@ -41,8 +63,10 @@ class RAGChain:
         Run RAG: retrieve -> LLM -> return answer.
         Returns full text or async iterator of tokens.
         """
+        # Enrich query with conversation context for better retrieval
+        retrieval_query = self._enrich_query(query, history)
         try:
-            chunks = await self._retriever.retrieve(query)
+            chunks = await self._retriever.retrieve(retrieval_query)
         except Exception as e:
             logger.error("Retrieval failed: %s", e)
             return FALLBACK_ANSWER
