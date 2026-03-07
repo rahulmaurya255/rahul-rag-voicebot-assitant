@@ -1,11 +1,7 @@
 
 # 1. Identity and Basic Background
 
-Rahul Maurya is a finance and AI enthusiast currently working at HSBC India. He combines experience in financial product with technical knowledge in data science, machine learning, backend development, and artificial intelligence systems.
-
-Rahul currently lives in Bangalore, India, where he has been working and living independently for the past several months. He originally comes from a small town in Uttar Pradesh, India. His journey represents the path of a self-driven professional who is actively building expertise across finance, technology, and artificial intelligence.
-
-Rahul is 23 years old and is currently in the early stage of his professional career. His long-term ambition is to work at the intersection of financial technology, artificial intelligence, and fraud detection systems.
+Rahul Maurya is a finance and AI enthusiast currently working at HSBC India. He blends experience in financial products with technical expertise in data science, machine learning, backend development, and AI systems. Based in Bangalore, he is a self-driven professional focused on building expertise at the intersection of fintech, artificial intelligence, and fraud detection.
 
 ---
 
@@ -13,25 +9,13 @@ Rahul is 23 years old and is currently in the early stage of his professional ca
 
 Rahul Maurya completed his Bachelor of Science (BSc) degree in Mathematics from Siddhartha University.
 
-His academic training in mathematics helped him develop strong analytical thinking, quantitative reasoning, and problem-solving skills. Mathematics played an important role in shaping his ability to understand complex systems, logical structures, and statistical reasoning.
-
-During his undergraduate education, he developed foundational skills in:
-
-- algebra and mathematical reasoning
-- probability and statistics
-- logical analysis
-- numerical problem solving
-- abstract thinking
-
-These foundations later helped him transition into the field of data science and machine learning.
+His academic training in mathematics helped him develop strong analytical thinking, quantitative reasoning, and problem-solving skills.
 
 ---
 
 # 3. Professional Experience
 
-# 3. Professional Experience
-
-Rahul Maurya has professional experience across financial technology, data science, and financial crime technology systems. His work spans machine learning development, AI system architecture, and financial services analytics.
+Rahul Maurya has professional experience across machine-learning, data science, and financial crime technology systems. His work spans machine learning development, AI system architecture, and financial services analytics.
 
 His professional experience includes building production-grade machine learning systems, developing AI-powered support systems, and working on financial crime transformation initiatives in large financial institutions.
 
