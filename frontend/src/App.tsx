@@ -59,6 +59,35 @@ function fetchTTSBlob(sentence: string, signal: AbortSignal): Promise<Blob | nul
   }).then(r => r.ok ? r.blob() : null).catch(() => null);
 }
 
+
+function spectralCentroid(fd: Uint8Array, sr: number, fft: number): number {
+  const bHz = sr / fft;
+  let ws = 0, tm = 0;
+  for (let i = 1; i < fd.length; i++) { ws += fd[i] * (i * bHz); tm += fd[i]; }
+  return tm > 0 ? ws / tm : 0;
+}
+
+function spectralFlatness(fd: Uint8Array): number {
+  let ls = 0, li = 0, n = 0;
+  for (let i = 1; i < fd.length; i++) { const v = Math.max(fd[i], 1); ls += Math.log(v); li += v; n++; }
+  if (n === 0 || li === 0) return 1;
+  return Math.exp(ls / n) / (li / n);
+}
+
+function speechBandRatio(fd: Uint8Array, sr: number, fft: number): number {
+  const bHz = sr / fft;
+  const lo = Math.floor(300 / bHz), hi = Math.min(Math.ceil(3500 / bHz), fd.length - 1);
+  let sE = 0, tE = 0;
+  for (let i = 1; i < fd.length; i++) { const e = fd[i] * fd[i]; tE += e; if (i >= lo && i <= hi) sE += e; }
+  return tE > 0 ? sE / tE : 0;
+}
+
+function computeRMS(chunks: Float32Array[]): number {
+  let sum = 0, count = 0;
+  for (const c of chunks) { for (let i = 0; i < c.length; i++) { sum += c[i] * c[i]; count++; } }
+  return count > 0 ? Math.sqrt(sum / count) : 0;
+}
+
 /* Word-by-word reveal: timing controlled by parent via subtitle updates */
 function WordReveal({ text, className, label }: { text: string; className: string; label: string }) {
   const [visibleCount, setVisibleCount] = useState(0);
@@ -123,19 +152,35 @@ export default function App() {
   const animFrameRef = useRef(0);
 
   const SAMPLE_RATE = 16000;
-  const VAD_SPEECH_MULTIPLIER = 3.0;
-  const VAD_SILENCE_MULTIPLIER = 1.5;
-  const VAD_MIN_SPEECH = 0.02;
-  const SPEECH_FRAMES_NEEDED = 5;
-  const SILENCE_FRAMES_NEEDED = 15;
-  const BARGE_IN_FRAMES = 4;
-  const CALIBRATION_FRAMES = 15;
+  const FFT_SIZE = 1024;
+  const SPK_MULT = 2.5;
+  const SIL_MULT = 1.3;
+  const MIN_RMS = 0.015;
+  const SPEECH_FRAMES_NEEDED = 7;
+  const SILENCE_FRAMES_NEEDED = 14;
+  const BARGE_IN_FRAMES = 5;
+  const CALIBRATION_FRAMES = 20;
+  const MIN_REC_SEC = 0.8;
+  const MIN_REC_RMS = 0.01;
 
   useEffect(() => {
     if (state === "listening") chimeListening();
     else if (state === "processing") chimeProcessing();
     else if (state === "speaking") chimeSpeaking();
   }, [state]);
+
+
+  const isSpeech = useCallback((rms: number): boolean => {
+    const thr = Math.max(MIN_RMS, noiseFloorRef.current * SPK_MULT);
+    if (rms < thr) return false;
+    const a = analyserRef.current;
+    if (!a) return true;
+    const fd = new Uint8Array(a.frequencyBinCount); a.getByteFrequencyData(fd);
+    const sc = spectralCentroid(fd, SAMPLE_RATE, FFT_SIZE); if (sc < 250 || sc > 3800) return false;
+    if (spectralFlatness(fd) > 0.85) return false;
+    if (speechBandRatio(fd, SAMPLE_RATE, FFT_SIZE) < 0.25) return false;
+    return true;
+  }, []);
 
   const initMic = useCallback(async () => {
     if (streamRef.current) return;
@@ -147,8 +192,8 @@ export default function App() {
     audioCtxRef.current = ctx;
     const source = ctx.createMediaStreamSource(stream);
     const analyser = ctx.createAnalyser();
-    analyser.fftSize = 512;
-    analyser.smoothingTimeConstant = 0.4;
+    analyser.fftSize = FFT_SIZE;
+    analyser.smoothingTimeConstant = 0.3;
     source.connect(analyser);
     analyserRef.current = analyser;
     const processor = ctx.createScriptProcessor(4096, 1, 1);
@@ -166,7 +211,7 @@ export default function App() {
           noiseFloorRef.current = noiseFloorRef.current * 0.7 + rms * 0.3;
           calibrationCountRef.current = cc + 1;
         } else if (stateRef.current === "idle") {
-          noiseFloorRef.current = noiseFloorRef.current * 0.95 + rms * 0.05;
+          noiseFloorRef.current = noiseFloorRef.current * 0.97 + rms * 0.03;
         }
       }
       if (stateRef.current === "listening") {
@@ -195,7 +240,8 @@ export default function App() {
     const merged = new Float32Array(totalLen);
     let off = 0;
     for (const c of chunks) { merged.set(c, off); off += c.length; }
-    if (merged.length < SAMPLE_RATE * 0.3) { setState("idle"); setSubtitle(""); return; }
+    if (merged.length < SAMPLE_RATE * MIN_REC_SEC) { setState("idle"); setSubtitle(""); return; }
+    if (computeRMS(chunks) < MIN_REC_RMS) { setState("idle"); setSubtitle(""); return; }
     const wavBlob = encodeWAV(merged, SAMPLE_RATE);
     await sendAudioStreaming(wavBlob);
   }, []);
@@ -346,30 +392,19 @@ export default function App() {
     setState("idle");
   }, []);
 
-  /* VAD loop with spectral energy analysis */
+  /* Multi-feature VAD loop */
   useEffect(() => {
     initMic();
     const interval = setInterval(() => {
       const v = volumeRef.current;
       const s = stateRef.current;
-      const speechThreshold = Math.max(VAD_MIN_SPEECH, noiseFloorRef.current * VAD_SPEECH_MULTIPLIER);
-      const silenceThreshold = Math.max(0.008, noiseFloorRef.current * VAD_SILENCE_MULTIPLIER);
+      
+      const silenceThreshold = Math.max(0.006, noiseFloorRef.current * SIL_MULT);
 
-      let isSpeechLike = true;
-      const analyser = analyserRef.current;
-      if (analyser && v > silenceThreshold) {
-        const freqData = new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteFrequencyData(freqData);
-        let speechEnergy = 0, lowEnergy = 0;
-        for (let i = 0; i <= 6; i++) lowEnergy += freqData[i];
-        for (let i = 10; i <= 112; i++) speechEnergy += freqData[i];
-        const speechAvg = speechEnergy / 103;
-        const lowAvg = lowEnergy / 7;
-        isSpeechLike = speechAvg > 3 && speechAvg > lowAvg * 0.6;
-      }
+      const speechDetected = isSpeech(v);
 
       if (s === "speaking" || s === "processing") {
-        if (v > speechThreshold * 2 && isSpeechLike) {
+        if (speechDetected) {
           speechCountRef.current++;
           if (speechCountRef.current >= BARGE_IN_FRAMES) {
             interruptAll();
@@ -389,7 +424,7 @@ export default function App() {
       }
 
       if (s === "idle") {
-        if (v > speechThreshold && isSpeechLike) {
+        if (speechDetected) {
           speechCountRef.current++;
           if (speechCountRef.current >= SPEECH_FRAMES_NEEDED) {
             startRecording();
@@ -411,15 +446,15 @@ export default function App() {
             speechCountRef.current = 0;
             stopRecordingAndSend();
           }
-        } else if (v > speechThreshold && isSpeechLike) {
+        } else if (speechDetected) {
           silenceCountRef.current = 0;
         } else {
           silenceCountRef.current = Math.max(0, silenceCountRef.current - 1);
         }
       }
-    }, 100);
+    }, 80);
     return () => clearInterval(interval);
-  }, [initMic, startRecording, stopRecordingAndSend, interruptAll]);
+  }, [initMic, startRecording, stopRecordingAndSend, interruptAll, isSpeech]);
 
   /* Canvas orb */
   useEffect(() => {
