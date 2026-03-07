@@ -272,38 +272,64 @@ html, body, #root {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Pause Button */
-.pause-btn {
-  display: inline-block;
-  padding: 6px 20px;
+/* Online/Offline Toggle */
+.toggle-row {
+  display: flex;
+  justify-content: center;
   margin-bottom: 6px;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 14px 5px 5px;
   border: 1px solid var(--border);
   border-radius: 20px;
   background: var(--surface2);
-  color: var(--text-dim);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all 0.3s ease;
+}
+
+.toggle-btn:hover { border-color: var(--text-muted); }
+
+.toggle-track {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: #333;
+  transition: background 0.3s ease;
+}
+
+.toggle-btn.online .toggle-track { background: var(--success); }
+.toggle-btn.offline .toggle-track { background: #555; }
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.3s ease;
+}
+
+.toggle-btn.online .toggle-thumb { transform: translateX(16px); }
+.toggle-btn.offline .toggle-thumb { transform: translateX(0); }
+
+.toggle-label {
   font-size: 12px;
   font-weight: 600;
-  font-family: var(--font);
-  cursor: pointer;
   letter-spacing: 0.5px;
-  transition: all 0.2s ease;
+  color: var(--text-dim);
+  transition: color 0.3s;
 }
 
-.pause-btn:hover {
-  border-color: var(--accent);
-  color: var(--text);
-  background: rgba(99, 102, 241, 0.1);
-}
-
-.pause-btn.paused {
-  border-color: var(--success);
-  color: var(--success);
-  background: rgba(34, 197, 94, 0.08);
-}
-
-.pause-btn.paused:hover {
-  background: rgba(34, 197, 94, 0.15);
-}
+.toggle-btn.online .toggle-label { color: var(--success); }
+.toggle-btn.offline .toggle-label { color: var(--text-muted); }
 
 /* Responsive */
 @media (max-width: 640px) {

@@ -619,13 +619,16 @@ export default function App() {
       </div>
 
       <footer className="footer-hint">
-        <button className={"pause-btn" + (paused ? " paused" : "")} onClick={() => {
-          if (!paused) { interruptAll(); }
-          setPaused(!paused);
-        }}>
-          {paused ? "Resume" : "Pause"}
-        </button>
-        <p>{paused ? "Paused — Mike is not listening" : "Always listening · Speak naturally · Tap orb to interrupt"}</p>
+        <div className="toggle-row">
+          <button className={"toggle-btn" + (paused ? " offline" : " online")} onClick={() => {
+            if (!paused) { interruptAll(); }
+            setPaused(!paused);
+          }}>
+            <span className="toggle-track"><span className="toggle-thumb" /></span>
+            <span className="toggle-label">{paused ? "Offline" : "Online"}</span>
+          </button>
+        </div>
+        <p>{paused ? "Mike is offline" : "Always listening · Speak naturally · Tap orb to interrupt"}</p>
       </footer>
     </div>
   );
