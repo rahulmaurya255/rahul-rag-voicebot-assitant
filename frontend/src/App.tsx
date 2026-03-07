@@ -131,6 +131,8 @@ export default function App() {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const pcmRef = useRef<Float32Array[]>([]);
+  const preRollRef = useRef<Float32Array[]>([]);
+  const chatHistoryRef = useRef<{role:string;content:string}[]>([]);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const audioElRef = useRef<HTMLAudioElement | null>(null);
   const ttsBufferRef = useRef<TTSItem[]>([]);
@@ -157,9 +159,10 @@ export default function App() {
   const SIL_MULT = 1.3;
   const MIN_RMS = 0.015;
   const SPEECH_FRAMES_NEEDED = 7;
-  const SILENCE_FRAMES_NEEDED = 14;
+  const SILENCE_FRAMES_NEEDED = 22;
   const BARGE_IN_FRAMES = 5;
   const CALIBRATION_FRAMES = 20;
+  const PRE_ROLL_CHUNKS = 5;
   const MIN_REC_SEC = 0.8;
   const MIN_REC_RMS = 0.01;
 
@@ -214,6 +217,9 @@ export default function App() {
           noiseFloorRef.current = noiseFloorRef.current * 0.97 + rms * 0.03;
         }
       }
+      /* Pre-roll: always keep last N chunks as ring buffer for capturing speech onset */
+      preRollRef.current.push(new Float32Array(data));
+      if (preRollRef.current.length > 5) preRollRef.current.shift();
       if (stateRef.current === "listening") {
         pcmRef.current.push(new Float32Array(data));
       }
@@ -222,7 +228,9 @@ export default function App() {
   }, []);
 
   const startRecording = useCallback(() => {
-    pcmRef.current = [];
+    /* Prepend pre-roll audio to capture the speech onset that triggered VAD */
+    pcmRef.current = [...preRollRef.current];
+    preRollRef.current = [];
     setState("listening");
     setError("");
   }, []);
@@ -249,6 +257,9 @@ export default function App() {
   const sendAudioStreaming = async (blob: Blob) => {
     const formData = new FormData();
     formData.append("audio", blob, "recording.wav");
+    if (chatHistoryRef.current.length > 0) {
+      formData.append("history", JSON.stringify(chatHistoryRef.current.slice(-6)));
+    }
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -260,6 +271,7 @@ export default function App() {
       const reader = resp.body!.getReader();
       const decoder = new TextDecoder();
       let sentenceBuffer = "";
+      let fullResponse = "";
       ttsBufferRef.current = [];
       ttsPlayingRef.current = false;
       displayedTextRef.current = "";
@@ -279,6 +291,7 @@ export default function App() {
               if (!evt.text) setSubtitle("I didn't quite catch that...");
             } else if (evt.type === "token") {
               sentenceBuffer += evt.text;
+              fullResponse += evt.text;
               /* Do NOT setSubtitle here - text reveals when TTS plays */
               const sentences = splitSentences(sentenceBuffer);
               if (sentences.length > 1) {
@@ -290,6 +303,9 @@ export default function App() {
                 if (!ttsPlayingRef.current) playTTSQueue(controller.signal);
               }
             } else if (evt.type === "done") {
+              if (fullResponse.trim()) chatHistoryRef.current.push({role:"assistant",content:fullResponse.trim()});
+              /* Keep only last 10 turns to limit memory */
+              if (chatHistoryRef.current.length > 10) chatHistoryRef.current = chatHistoryRef.current.slice(-10);
               if (sentenceBuffer.trim()) {
                 const s = sentenceBuffer.trim();
                 ttsBufferRef.current.push({ text: s, blob: fetchTTSBlob(s, controller.signal) });

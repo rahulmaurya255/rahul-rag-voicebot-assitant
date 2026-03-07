@@ -2,7 +2,7 @@
 
 import json as _json
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response, StreamingResponse, PlainTextResponse
 
 from app.core.config import get_settings
@@ -65,7 +65,7 @@ async def voice_query(audio: UploadFile = File(...)):
 
 
 @router.post("/voice-query/stream")
-async def voice_query_stream(audio: UploadFile = File(...)):
+async def voice_query_stream(audio: UploadFile = File(...), history: str = Form(default="")):
     """Voice query: audio -> STT -> RAG stream. Returns SSE."""
     settings = get_settings()
     max_bytes = settings.max_upload_size_mb * 1024 * 1024
@@ -89,8 +89,16 @@ async def voice_query_stream(audio: UploadFile = File(...)):
 
         return StreamingResponse(empty_gen(), media_type="text/event-stream")
 
+    # Parse conversation history for multi-turn context
+    chat_history = None
+    if history:
+        try:
+            chat_history = _json.loads(history)
+        except Exception:
+            pass
+
     chain = RAGChain()
-    result = await chain.query(text, stream=True)
+    result = await chain.query(text, stream=True, history=chat_history)
 
     transcription_evt = _json.dumps({"type": "transcription", "text": text})
     done_evt = _json.dumps({"type": "done"})

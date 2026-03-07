@@ -35,6 +35,7 @@ class RAGChain:
         self,
         query: str,
         stream: bool = True,
+        history: list | None = None,
     ) -> str | AsyncIterator[str]:
         """
         Run RAG: retrieve -> LLM -> return answer.
@@ -50,8 +51,8 @@ class RAGChain:
 
         try:
             if stream:
-                return await self._llm.generate(context=context, query=query, stream=True)
-            return await self._llm.generate(context=context, query=query, stream=False)
+                return await self._llm.generate(context=context, query=query, history=history, stream=True)
+            return await self._llm.generate(context=context, query=query, history=history, stream=False)
         except Exception as e:
             logger.error("LLM generation failed: %s", e)
             return FALLBACK_ANSWER

@@ -1,4 +1,4 @@
-"""Text chunking for RAG. Chunk size 200 chars, overlap 30."""
+"""Text chunking for RAG. Chunk size 500 chars, overlap 80."""
 
 from typing import Any
 
@@ -9,8 +9,8 @@ from app.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-CHUNK_SIZE = 200
-CHUNK_OVERLAP = 30
+CHUNK_SIZE = 500
+CHUNK_OVERLAP = 80
 
 
 def chunk_documents(

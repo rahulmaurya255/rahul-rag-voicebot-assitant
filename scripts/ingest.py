@@ -31,9 +31,9 @@ def main() -> None:
         return
     print(f"Loaded {len(docs)} documents.")
 
-    # Chunk (200 chars, 30 overlap)
-    print("Chunking (size=200, overlap=30)...")
-    chunks = chunk_documents(docs, chunk_size=200, chunk_overlap=30)
+    # Chunk (500 chars, 80 overlap)
+    print("Chunking (size=500, overlap=80)...")
+    chunks = chunk_documents(docs, chunk_size=500, chunk_overlap=80)
     if not chunks:
         print("No chunks produced.")
         return
